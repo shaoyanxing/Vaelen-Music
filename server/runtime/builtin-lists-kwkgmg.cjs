@@ -1,9 +1,5 @@
 // 服务端内置歌单/排行榜 SDK —— 从 lx-music-desktop 官方源码移植（Node CJS 版本）
-// 源文件（master 分支，ESM → CJS 忠实转换）：
-//   src/renderer/utils/musicSdk/kw/songList.js, kw/leaderboard.js, kw/album.js, kw/util.js
-//   src/renderer/utils/musicSdk/kg/songList.js, kg/leaderboard.js, kg/util.js, kg/vendors/infSign.min.js
-//   src/renderer/utils/musicSdk/mg/songList.js, mg/leaderboard.js, mg/musicInfo.js, mg/musicSearch.js, mg/utils/index.js
-//   src/common/utils/common.ts（dateFormat）, src/renderer/utils/index.ts（formatPlayCount）
+// 感谢lx-music-desktop 项目的付出
 // 复用 builtin-sdk.cjs 的工具（httpRequest、toMD5、sizeFormate、formatPlayTime、decodeName、
 // formatSingerName、formatSinger、toNewSongInfo、mgSignature、numFix 等）。
 const crypto = require('crypto');
