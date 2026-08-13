@@ -284,24 +284,26 @@ const triggerDownload = (url, filename) => {
   document.body.removeChild(link)
 }
 
-export const downloadMusic = async (sourceId, musicInfo, quality, filename) => {
-  const url = await api.musicUrl(sourceId, musicInfo, quality)
-  const name = filename || (musicInfo.name || 'music') + (musicInfo.singer ? ' - ' + musicInfo.singer : '')
+export const downloadMusic = async (sourceId, musicInfo, quality, filename, url) => {
+  const target = filename || (musicInfo.name || 'music') + (musicInfo.singer ? ' - ' + musicInfo.singer : '')
   if (hasTauri()) {
-    // Tauri 桌面：直链下载
-    triggerDownload(url, name)
-  } else {
-    // Web 模式：优先 fetch→blob，失败回退到同源服务端代理
-    try {
-      const res = await fetch(url)
-      if (res.ok) {
-        const blob = await res.blob()
-        triggerDownload(URL.createObjectURL(blob), name)
-        return
-      }
-    } catch (_) { /* 直链 fetch 失败（CORS），回退到代理 */ }
-    triggerDownload(`/api/download?url=${encodeURIComponent(url)}&filename=${encodeURIComponent(name)}`, name)
+    // Tauri 桌面：弹系统保存对话框选择路径，Rust 流式下载
+    const saved = await invoke('download_song', { url, filename: target })
+    if (saved === '__cancelled__') throw new Error('DOWNLOAD_CANCELLED')
+    return saved
   }
+  const realUrl = url || await api.musicUrl(sourceId, musicInfo, quality)
+  // Web 模式：优先 fetch→blob，失败回退到同源服务端代理
+  try {
+    const res = await fetch(realUrl)
+    if (res.ok) {
+      const blob = await res.blob()
+      triggerDownload(URL.createObjectURL(blob), target)
+      return null
+    }
+  } catch (_) { /* 直链 fetch 失败（CORS），回退到代理 */ }
+  triggerDownload(`/api/download?url=${encodeURIComponent(realUrl)}&filename=${encodeURIComponent(target)}`, target)
+  return null
 }
 
 export { runtime, hasTauri }

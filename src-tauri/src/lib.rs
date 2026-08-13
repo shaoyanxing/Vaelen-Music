@@ -12,6 +12,7 @@ pub fn run() {
       commands::user_api::user_api_get_all,
       commands::settings::settings_get,
       commands::settings::settings_set,
+      commands::downloads::download_song,
     ]);
 
   #[cfg(debug_assertions)]

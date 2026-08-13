@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { invoke } from '@tauri-apps/api/core'
+import { listen } from '@tauri-apps/api/event'
 import { api, downloadMusic } from '../api'
 
 export const usePlayerStore = defineStore('player', () => {
@@ -293,6 +294,16 @@ export const useAppStore = defineStore('app', () => {
   ])
   const downloads = ref([])
 
+  // Rust 端下载进度事件 → 更新对应下载项
+  if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+    listen('download-progress', (e) => {
+      const { url, percent } = e.payload || {}
+      if (!url || typeof percent !== 'number') return
+      const item = downloads.value.find(d => d.status === 'downloading' && d.url === url)
+      if (item) item.progress = percent
+    }).catch(() => {})
+  }
+
   // ============ 持久化（列表 / 下载记录） ============
   // Tauri：写入 %APPDATA%\com.vaelen.music\settings.json
   // Web：localStorage 'vaelen-data'
@@ -305,18 +316,21 @@ export const useAppStore = defineStore('app', () => {
     } catch (_) { return {} }
   }
 
+  // 保存：200ms 防抖（下载进度不频繁写盘）+ 窗口关闭前兜底 flush
   let saveTimer = null
   function scheduleSave() {
     clearTimeout(saveTimer)
-    saveTimer = setTimeout(saveNow, 400)
+    saveTimer = setTimeout(saveNow, 200)
   }
 
+  let saveSeq = 0
   async function saveNow() {
+    const seq = ++saveSeq
     try {
       const payload = {
         userLists: userLists.value,
         downloads: downloads.value.map(d => {
-          const { progress, status, ...rest } = d  // 进度/状态不持久化
+          const { progress, status, url, ...rest } = d  // 进度/状态/链接不持久化
           return rest
         }),
       }
@@ -326,8 +340,14 @@ export const useAppStore = defineStore('app', () => {
         localStorage.setItem('vaelen-data', JSON.stringify(payload))
       }
     } catch (e) {
-      console.error('Failed to persist data:', e)
+      if (seq === saveSeq) console.error('Failed to persist data:', e)
     }
+  }
+
+  // 窗口关闭前兜底保存（Tauri 关闭窗口 / 页面卸载）
+  if (typeof window !== 'undefined') {
+    window.addEventListener('pagehide', () => { saveNow() })
+    window.addEventListener('beforeunload', () => { saveNow() })
   }
 
   async function restoreData() {
@@ -357,8 +377,8 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  watch(userLists, scheduleSave, { deep: true })
-  watch(downloads, scheduleSave, { deep: true })
+  watch(userLists, scheduleSave, { deep: true, flush: 'sync' })
+  watch(downloads, scheduleSave, { deep: true, flush: 'sync' })
 
   async function loadSources() {
     try {
@@ -437,12 +457,23 @@ export const useAppStore = defineStore('app', () => {
     const item = addDownload(song, quality)
     item.status = 'downloading'
     try {
-      await downloadMusic(source, song, item.quality)
+      const ext = quality && (quality.startsWith('flac') || quality === 'hires' || quality === 'master') ? '.flac' : '.mp3'
+      const filename = (song.name || 'music') + (song.singer ? ' - ' + song.singer : '') + ext
+      // 先取 URL 并记录到下载项，便于接收 RUST 进度事件
+      const url = await api.musicUrl(source, song, item.quality)
+      item.url = url
+      item.filePath = await downloadMusic(source, song, item.quality, filename, url)
       item.status = 'done'
       item.progress = 100
       return true
     } catch (e) {
       console.error('Download failed:', e)
+      if (String(e?.message || '').includes('DOWNLOAD_CANCELLED')) {
+        // 用户取消了保存对话框 → 移除下载项，不报错
+        const idx = downloads.value.indexOf(item)
+        if (idx >= 0) downloads.value.splice(idx, 1)
+        return false
+      }
       item.status = 'error'
       return Promise.reject(new Error('下载失败：' + (e.message || e)))
     }
