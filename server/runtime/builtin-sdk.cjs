@@ -1,6 +1,4 @@
 // 服务端内置音源搜索 SDK —— 从 src/music-sdk 移植（Node CJS 版本）
-// 解决 Web 模式下浏览器 fetch 第三方接口的 CORS 问题，
-// 并保证搜索返回的歌曲 ID 与 lx-music-desktop 内置 SDK 一致（可被自定义音源用于播放）。
 const https = require('https');
 const http = require('http');
 const crypto = require('crypto');
