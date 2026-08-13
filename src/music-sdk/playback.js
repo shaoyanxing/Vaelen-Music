@@ -1,6 +1,5 @@
 // 内置源播放/歌词/封面实现 —— 从 server/runtime/builtin-lists-wytx.cjs 与
 // server/runtime/builtin-lists-kwkgmg.cjs 移植为浏览器/Tauri 通用版本。
-// 这样播放不依赖第三方脚本（非常刀/星海）的 API key 失效问题。
 import { httpGet, httpPostForm, httpPostJson } from './http.js'
 import { eapi, zzcSign, mgSignature } from './crypto.js'
 // 仅用 toMD5 / eapi / zzcSign / mgSignature；下面这些工具在本文件中暂未直接使用
