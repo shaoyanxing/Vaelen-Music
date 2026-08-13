@@ -54,15 +54,10 @@ watch(pickerSong, (s) => {
 
 function choose(q) {
   const s = song.value
-  const name = (s.name || 'music') + (s.singer ? ' - ' + s.singer : '')
-  const ext = q.startsWith('flac') || q === 'hires' || q === 'master' ? '.flac' : '.mp3'
   visible.value = false
   clearDownloadPicker()
-  const item = appStore.addDownload(s, q)
-  item.status = 'downloading'
-  import('../api').then(({ downloadMusic }) => downloadMusic(s.source || 'wy', s, q, name + ext))
-    .then(() => { item.status = 'done'; item.progress = 100 })
-    .catch(e => { item.status = 'error' })
+  // 统一走 store：内部负责下载项状态、保存路径对话框、取消处理与持久化
+  appStore.downloadSong(s, q).catch(() => {})
 }
 
 function cancel() {

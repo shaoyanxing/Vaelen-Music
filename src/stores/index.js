@@ -316,13 +316,8 @@ export const useAppStore = defineStore('app', () => {
     } catch (_) { return {} }
   }
 
-  // 保存：200ms 防抖（下载进度不频繁写盘）+ 窗口关闭前兜底 flush
-  let saveTimer = null
-  function scheduleSave() {
-    clearTimeout(saveTimer)
-    saveTimer = setTimeout(saveNow, 200)
-  }
-
+  // 保存：收藏/列表每次变更立即落盘（无防抖，避免关闭窗口时丢失最后一次修改）；
+  // 下载项进度不上看（显式保存点），避免高频写盘
   let saveSeq = 0
   async function saveNow() {
     const seq = ++saveSeq
@@ -377,8 +372,11 @@ export const useAppStore = defineStore('app', () => {
     }
   }
 
-  watch(userLists, scheduleSave, { deep: true, flush: 'sync' })
-  watch(downloads, scheduleSave, { deep: true, flush: 'sync' })
+  // 收藏/列表任意修改 → 立即持久化（sync flush 保证变更即刻触发，不积压）
+  watch(userLists, () => saveNow(), { deep: true, flush: 'sync' })
+
+  // 下载项不整列表 watch（进度高频变化），在显式保存点调用 saveNow：
+  // addDownload / downloadSong 各状态 / removeDownload
 
   async function loadSources() {
     try {
@@ -447,8 +445,9 @@ export const useAppStore = defineStore('app', () => {
   function addDownload(song, quality) {
     const item = { ...song, status: 'pending', progress: 0, quality: quality || '128k' }
     const existing = downloads.value.find(d => d.songid === song.id && d.source === song.source && d.quality === item.quality)
-    if (existing) { existing.status = 'pending'; existing.progress = 0; return existing }
+    if (existing) { existing.status = 'pending'; existing.progress = 0; saveNow(); return existing }
     downloads.value.push(item)
+    saveNow()
     return item
   }
 
@@ -456,6 +455,7 @@ export const useAppStore = defineStore('app', () => {
     const source = song.source || activeSource.value || 'wy'
     const item = addDownload(song, quality)
     item.status = 'downloading'
+    saveNow()
     try {
       const ext = quality && (quality.startsWith('flac') || quality === 'hires' || quality === 'master') ? '.flac' : '.mp3'
       const filename = (song.name || 'music') + (song.singer ? ' - ' + song.singer : '') + ext
@@ -465,6 +465,7 @@ export const useAppStore = defineStore('app', () => {
       item.filePath = await downloadMusic(source, song, item.quality, filename, url)
       item.status = 'done'
       item.progress = 100
+      saveNow()
       return true
     } catch (e) {
       console.error('Download failed:', e)
@@ -472,15 +473,18 @@ export const useAppStore = defineStore('app', () => {
         // 用户取消了保存对话框 → 移除下载项，不报错
         const idx = downloads.value.indexOf(item)
         if (idx >= 0) downloads.value.splice(idx, 1)
+        saveNow()
         return false
       }
       item.status = 'error'
+      saveNow()
       return Promise.reject(new Error('下载失败：' + (e.message || e)))
     }
   }
 
   function removeDownload(index) {
     downloads.value.splice(index, 1)
+    saveNow()
   }
   return {
     sources, activeSource, searchResults, searchKeyword, isLoading, searchError, sourceError,

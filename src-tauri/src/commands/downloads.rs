@@ -10,24 +10,10 @@ struct DownloadProgress {
   percent: u8,
 }
 
-/// 弹出系统「另存为」对话框选择保存路径，流式下载写入文件。
-/// 返回保存的完整路径；用户取消时返回 "__cancelled__"。
+/// 把 url 流式下载写入 path（保存路径由前端 dialog 插件选择）。
+/// 下载过程中持续 emit `download-progress` 事件供前端更新进度。
 #[tauri::command]
-pub async fn download_song(
-  app: AppHandle,
-  url: String,
-  filename: Option<String>,
-) -> Result<String, String> {
-  let mut dialog = rfd::FileDialog::new();
-  if let Some(name) = filename {
-    if !name.trim().is_empty() {
-      dialog = dialog.set_file_name(name.trim().to_string());
-    }
-  }
-  let Some(path) = dialog.save_file() else {
-    return Ok("__cancelled__".to_string());
-  };
-
+pub async fn download_to(app: AppHandle, url: String, path: String) -> Result<(), String> {
   let resp = reqwest::get(&url).await.map_err(|e| format!("请求失败: {e}"))?;
   if !resp.status().is_success() {
     return Err(format!("服务端返回 {}", resp.status()));
@@ -52,5 +38,5 @@ pub async fn download_song(
     "download-progress",
     DownloadProgress { url: url.clone(), percent: 100 },
   );
-  Ok(path.to_string_lossy().into_owned())
+  Ok(())
 }

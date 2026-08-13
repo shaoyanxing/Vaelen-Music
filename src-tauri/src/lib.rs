@@ -12,8 +12,11 @@ pub fn run() {
       commands::user_api::user_api_get_all,
       commands::settings::settings_get,
       commands::settings::settings_set,
-      commands::downloads::download_song,
+      commands::downloads::download_to,
     ]);
+
+  let builder = builder
+    .plugin(tauri_plugin_dialog::init());
 
   #[cfg(debug_assertions)]
   let builder = builder

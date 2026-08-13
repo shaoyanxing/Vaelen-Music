@@ -287,10 +287,15 @@ const triggerDownload = (url, filename) => {
 export const downloadMusic = async (sourceId, musicInfo, quality, filename, url) => {
   const target = filename || (musicInfo.name || 'music') + (musicInfo.singer ? ' - ' + musicInfo.singer : '')
   if (hasTauri()) {
-    // Tauri 桌面：弹系统保存对话框选择路径，Rust 流式下载
-    const saved = await invoke('download_song', { url, filename: target })
-    if (saved === '__cancelled__') throw new Error('DOWNLOAD_CANCELLED')
-    return saved
+    // Tauri 桌面：官方 dialog 插件弹「另存为」→ Rust 流式下载到所选路径
+    const { save } = await import('@tauri-apps/plugin-dialog')
+    const savedPath = await save({
+      defaultPath: target,
+      filters: [{ name: '音频', extensions: ['mp3', 'flac', 'm4a', 'aac', 'wav', 'ogg', 'opus'] }],
+    })
+    if (!savedPath) throw new Error('DOWNLOAD_CANCELLED')
+    await invoke('download_to', { url, path: savedPath })
+    return savedPath
   }
   const realUrl = url || await api.musicUrl(sourceId, musicInfo, quality)
   // Web 模式：优先 fetch→blob，失败回退到同源服务端代理
