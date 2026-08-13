@@ -23,8 +23,12 @@ fn read_settings(app: &tauri::AppHandle) -> Value {
 }
 
 #[tauri::command]
-pub fn settings_get(app: tauri::AppHandle) -> Value {
-  read_settings(&app)
+pub fn settings_get(app: tauri::AppHandle, key: Option<String>) -> Value {
+  let settings = read_settings(&app);
+  match key {
+    Some(k) => settings.get(&k).cloned().unwrap_or_else(|| Value::Null),
+    None => settings,
+  }
 }
 
 #[tauri::command]

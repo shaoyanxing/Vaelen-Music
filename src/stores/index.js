@@ -311,7 +311,14 @@ export const useAppStore = defineStore('app', () => {
 
   async function readPersisted() {
     try {
-      if (hasTauri()) return await invoke('settings_get')
+      if (hasTauri()) {
+        // 取 'data' 键的值：{ userLists, downloads }；兼容老版本未传 key 返回整文件的情况
+        const raw = await invoke('settings_get', { key: 'data' })
+        if (raw && typeof raw === 'object') {
+          return (raw.data && typeof raw.data === 'object') ? raw.data : raw
+        }
+        return {}
+      }
       return JSON.parse(localStorage.getItem('vaelen-data') || '{}')
     } catch (_) { return {} }
   }
