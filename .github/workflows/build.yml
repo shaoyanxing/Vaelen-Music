@@ -1,0 +1,90 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-latest
+            label: Windows
+          - platform: macos-latest
+            label: macOS
+          - platform: ubuntu-22.04
+            label: Linux
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin' || '' }}
+
+      - name: Rust 缓存
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: 安装 Linux 系统依赖 (webkit2gtk-4.1)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libgtk-3-dev
+
+      - name: 安装前端依赖
+        run: npm ci
+
+      - name: 同步 tag 版本号到 tauri.conf.json
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          node -e "const fs=require('fs');const v=process.env.GITHUB_REF.replace('refs/tags/v','').split('-')[0];const p='src-tauri/tauri.conf.json';const j=JSON.parse(fs.readFileSync(p));j.version=v;fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');console.log('version ->', v)"
+
+      - name: 前端构建自检
+        run: npm run build
+
+      - name: 打包桌面应用 (tag 触发时自动发布 Release)
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: 'Vaelen Music v__VERSION__'
+          releaseBody: |
+            自动构建产物：Windows (NSIS/MSI) / macOS (DMG) / Linux (DEB/AppImage)
+            安装说明见 README。macOS 用户首次打开如提示"无法验证开发者"，请在 系统设置 → 隐私与安全性 中允许。
+          releaseDraft: true
+          prerelease: false
+
+      - name: 上传构建产物（供 PR / 手动触发时下载）
+        uses: actions/upload-artifact@v4
+        with:
+          name: vaelen-music-${{ matrix.label }}
+          path: |
+            src-tauri/target/release/bundle/**/*.exe
+            src-tauri/target/release/bundle/**/*.msi
+            src-tauri/target/release/bundle/**/*.dmg
+            src-tauri/target/release/bundle/**/*.deb
+            src-tauri/target/release/bundle/**/*.AppImage
+          if-no-files-found: ignore
+          retention-days: 14

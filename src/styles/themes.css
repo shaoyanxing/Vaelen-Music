@@ -1,0 +1,459 @@
+/* ═══════════════════════════════════════════════════════════
+   SONAR MUSIC — Theme System
+   4 distinct themes that go beyond color: typography, radius,
+   shadows, backdrop blur, background images, and textures.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Default structural tokens (overridden per theme) ── */
+:root {
+  /* Radius scale */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Shadow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.25);
+  --shadow-glow: 0 0 0 0 transparent;
+
+  /* Glass / backdrop */
+  --glass-blur: 8px;
+  --glass-alpha: 0.7;
+
+  /* Background layers */
+  --bg-image: none;
+  --bg-noise: none;
+  --bg-glow: none;
+
+  /* Surface texture (for paper / aurora) */
+  --surface-texture: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   THEME 1 — MIDNIGHT (default)
+   Dark glassmorphism, warm amber accent, large radius,
+   strong backdrop blur, subtle noise texture.
+   ═══════════════════════════════════════════════════════════ */
+:root,
+[data-theme="midnight"] {
+  /* Colors */
+  --bg-base: #0f1117;
+  --bg-surface: rgba(23, 25, 33, 0.65);
+  --bg-elevated: rgba(30, 32, 40, 0.85);
+  --bg-hover: rgba(37, 40, 48, 0.85);
+  --bg-active: rgba(44, 47, 56, 0.9);
+
+  --accent: #e8a838;
+  --accent-dim: #c48a2a;
+  --accent-glow: rgba(232, 168, 56, 0.18);
+  --accent-subtle: rgba(232, 168, 56, 0.08);
+
+  --text-primary: #e8e6e3;
+  --text-secondary: #9a9890;
+  --text-tertiary: #6a6860;
+  --text-inverse: #0f1117;
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.14);
+
+  --success: #5cb87a;
+  --danger: #e05858;
+  --info: #5b9bd5;
+
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --scrollbar-hover: rgba(255, 255, 255, 0.2);
+
+  /* Typography (default sans) */
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei', system-ui, sans-serif;
+  --font-display: var(--font-body);
+  --font-mono: 'SF Mono', 'Cascadia Mono', Consolas, 'JetBrains Mono', monospace;
+
+  /* Radius (medium-large, friendly) */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  /* Shadow (soft, layered) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 24px rgba(232, 168, 56, 0.15);
+
+  /* Glass (strong) */
+  --glass-blur: 20px;
+  --glass-alpha: 0.7;
+
+  /* Backdrop layers */
+  --bg-image:
+    radial-gradient(ellipse at 20% 0%, rgba(232, 168, 56, 0.08), transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(91, 155, 213, 0.06), transparent 50%);
+  --bg-glow: radial-gradient(circle at 50% 50%, var(--accent-glow), transparent 70%);
+  --bg-noise:
+    url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.4 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  --surface-texture: none;
+
+  color-scheme: dark;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   THEME 2 — NEON (浅色赛博)
+   Cyber-print: 亮白基底 + 荧光青紫，直角 + 等宽字体 + 网格纹理。
+   与 deep neon 一脉相承，但整体转浅色：sharp + techno。
+   ═══════════════════════════════════════════════════════════ */
+[data-theme="neon"] {
+  --bg-base: #f4f6fb;
+  --bg-surface: rgba(255, 255, 255, 0.92);
+  --bg-elevated: rgba(255, 255, 255, 0.98);
+  --bg-hover: rgba(232, 236, 248, 0.95);
+  --bg-active: rgba(220, 226, 244, 0.98);
+
+  --accent: #0090ff;
+  --accent-dim: #0070cc;
+  --accent-glow: rgba(0, 144, 255, 0.2);
+  --accent-subtle: rgba(0, 144, 255, 0.08);
+
+  --accent-2: #c026d3; /* secondary neon */
+  --accent-2-glow: rgba(192, 38, 211, 0.18);
+
+  --text-primary: #141830;
+  --text-secondary: #4a5270;
+  --text-tertiary: #8b92ac;
+  --text-inverse: #ffffff;
+
+  --border: rgba(20, 24, 48, 0.14);
+  --border-strong: rgba(20, 24, 48, 0.3);
+
+  --success: #00a878;
+  --danger: #e5484d;
+  --info: #0090ff;
+
+  --scrollbar-thumb: rgba(20, 24, 48, 0.18);
+  --scrollbar-hover: rgba(20, 24, 48, 0.32);
+
+  /* Mono-leaning display font for that techy feel */
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei', system-ui, sans-serif;
+  --font-display: 'SF Mono', 'Cascadia Mono', Consolas, 'JetBrains Mono', monospace;
+  --font-mono: 'SF Mono', 'Cascadia Mono', Consolas, 'JetBrains Mono', monospace;
+
+  /* Sharp corners — 直角，赛博切角感 */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-pill: 0;
+
+  /* Hard, precise shadows */
+  --shadow-sm: 0 1px 0 rgba(20, 24, 48, 0.06);
+  --shadow-md: 0 2px 0 rgba(20, 24, 48, 0.08), 0 8px 24px rgba(20, 24, 48, 0.08);
+  --shadow-lg: 0 4px 0 rgba(20, 24, 48, 0.1), 0 16px 40px rgba(20, 24, 48, 0.12);
+  --shadow-glow: 0 0 16px rgba(0, 144, 255, 0.35);
+
+  --glass-blur: 8px;
+  --glass-alpha: 0.92;
+
+  /* Blueprint grid + scanlines on light base */
+  --bg-image:
+    linear-gradient(rgba(0, 144, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 144, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(0, 144, 255, 0.05), transparent 25%, transparent 75%, rgba(192, 38, 211, 0.04));
+  --bg-size: 42px 42px, 42px 42px, 100% 100%;
+  --bg-glow: radial-gradient(circle at 50% 0%, rgba(0, 144, 255, 0.1), transparent 60%);
+  --bg-noise: none;
+  --surface-texture:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px,
+      transparent 3px,
+      rgba(0, 144, 255, 0.02) 3px,
+      rgba(0, 144, 255, 0.02) 4px
+    );
+
+  color-scheme: light;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   THEME 3 — PAPER
+   Warm study / paper notebook. Cream base, brown accent,
+   serif headings, very large radius, soft paper shadow,
+   subtle paper-fiber noise. Generous, calm, bookish.
+   ═══════════════════════════════════════════════════════════ */
+[data-theme="paper"] {
+  --bg-base: #f4ede0;
+  --bg-surface: rgba(252, 248, 240, 0.92);
+  --bg-elevated: rgba(248, 242, 230, 0.95);
+  --bg-hover: rgba(232, 222, 204, 0.95);
+  --bg-active: rgba(220, 208, 188, 0.98);
+
+  --accent: #8b4f1f;
+  --accent-dim: #6d3d18;
+  --accent-glow: rgba(139, 79, 31, 0.18);
+  --accent-subtle: rgba(139, 79, 31, 0.08);
+
+  --text-primary: #2a221a;
+  --text-secondary: #6b5d4a;
+  --text-tertiary: #9a8c75;
+  --text-inverse: #faf6ec;
+
+  --border: rgba(74, 56, 35, 0.14);
+  --border-strong: rgba(74, 56, 35, 0.28);
+
+  --success: #5a7d3a;
+  --danger: #b34a3a;
+  --info: #4a6b8a;
+
+  --scrollbar-thumb: rgba(74, 56, 35, 0.18);
+  --scrollbar-hover: rgba(74, 56, 35, 0.32);
+
+  /* Serif headings, humanist body */
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei', system-ui, sans-serif;
+  --font-display: 'Georgia', 'Source Han Serif SC', 'Noto Serif CJK SC',
+    'Songti SC', 'SimSun', serif;
+  --font-mono: 'SF Mono', 'Cascadia Mono', Consolas, 'JetBrains Mono', monospace;
+
+  /* Generous, soft radius */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+
+  /* Soft, layered paper shadow */
+  --shadow-sm: 0 1px 2px rgba(74, 56, 35, 0.08);
+  --shadow-md: 0 3px 8px rgba(74, 56, 35, 0.1), 0 1px 2px rgba(74, 56, 35, 0.06);
+  --shadow-lg: 0 8px 24px rgba(74, 56, 35, 0.15), 0 2px 6px rgba(74, 56, 35, 0.08);
+  --shadow-glow: 0 0 20px rgba(139, 79, 31, 0.12);
+
+  --glass-blur: 6px;
+  --glass-alpha: 0.92;
+
+  /* Warm gradient with a hint of light from upper-left */
+  --bg-image:
+    radial-gradient(ellipse at 15% 0%, rgba(255, 240, 210, 0.6), transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(220, 200, 170, 0.3), transparent 60%);
+  --bg-glow: none;
+  /* Paper-fiber noise (sparse) */
+  --bg-noise:
+    url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='p'><feTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 0.4  0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0.15 0'/></filter><rect width='100%25' height='100%25' filter='url(%23p)'/></svg>");
+  --surface-texture:
+    radial-gradient(circle at 30% 40%, rgba(139, 79, 31, 0.03) 0, transparent 40%),
+    radial-gradient(circle at 70% 80%, rgba(139, 79, 31, 0.04) 0, transparent 40%);
+
+  color-scheme: light;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   THEME 4 — AURORA (浅色极光)
+   Soft pastel aurora. Mint + lavender + peach on a near-white
+   base. Pillowy oversized radius, strong glass blur, smooth
+   animated gradient backdrop. 明亮透气。
+   ═══════════════════════════════════════════════════════════ */
+[data-theme="aurora"] {
+  --bg-base: #f2f5f7;
+  --bg-surface: rgba(255, 255, 255, 0.66);
+  --bg-elevated: rgba(255, 255, 255, 0.8);
+  --bg-hover: rgba(240, 244, 250, 0.85);
+  --bg-active: rgba(232, 238, 246, 0.9);
+
+  --accent: #0ea5a4;
+  --accent-dim: #0c8a89;
+  --accent-glow: rgba(14, 165, 164, 0.22);
+  --accent-subtle: rgba(14, 165, 164, 0.08);
+
+  --accent-2: #8b7cf6;
+  --accent-3: #f493b8;
+
+  --text-primary: #1d2733;
+  --text-secondary: #55637a;
+  --text-tertiary: #8f9db5;
+  --text-inverse: #ffffff;
+
+  --border: rgba(29, 39, 51, 0.1);
+  --border-strong: rgba(29, 39, 51, 0.18);
+
+  --success: #0ea5a4;
+  --danger: #e5484d;
+  --info: #8b7cf6;
+
+  --scrollbar-thumb: rgba(139, 124, 246, 0.3);
+  --scrollbar-hover: rgba(139, 124, 246, 0.5);
+
+  /* Rounded, friendly display */
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Microsoft YaHei', system-ui, sans-serif;
+  --font-display: 'SF Pro Rounded', -apple-system, BlinkMacSystemFont,
+    'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Cascadia Mono', Consolas, 'JetBrains Mono', monospace;
+
+  /* Pillowy large radius — 超大圆角 "pill" 风 */
+  --radius-xs: 8px;
+  --radius-sm: 14px;
+  --radius-md: 22px;
+  --radius-lg: 32px;
+  --radius-pill: 999px;
+
+  /* Soft, colored glows */
+  --shadow-sm: 0 2px 6px rgba(29, 39, 51, 0.06);
+  --shadow-md: 0 6px 20px rgba(14, 165, 164, 0.1), 0 4px 12px rgba(139, 124, 246, 0.07);
+  --shadow-lg: 0 16px 40px rgba(14, 165, 164, 0.14), 0 8px 24px rgba(139, 124, 246, 0.1);
+  --shadow-glow: 0 0 24px rgba(14, 165, 164, 0.18);
+
+  --glass-blur: 24px;
+  --glass-alpha: 0.72;
+
+  /* Animated aurora gradient — 浅色柔和版 */
+  --bg-image:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(14, 165, 164, 0.14), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 82% 25%, rgba(139, 124, 246, 0.12), transparent 60%),
+    radial-gradient(ellipse 60% 50% at 60% 85%, rgba(244, 147, 184, 0.1), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 25% 92%, rgba(125, 211, 252, 0.12), transparent 60%);
+  --bg-glow: radial-gradient(circle at 50% 50%, var(--accent-glow), transparent 70%);
+  --bg-noise: none;
+  --surface-texture: none;
+
+  color-scheme: light;
+}
+
+/* Aurora animates its gradient for a living, breathing feel */
+[data-theme="aurora"] body,
+[data-theme="aurora"] .app-layout,
+[data-theme="aurora"] .main-content {
+  background-image: var(--bg-image);
+  background-attachment: fixed;
+  background-size: 200% 200%, 200% 200%, 200% 200%, 200% 200%;
+  animation: aurora-drift 24s ease-in-out infinite;
+}
+
+@keyframes aurora-drift {
+  0%, 100% {
+    background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%;
+  }
+  50% {
+    background-position: 30% 20%, 70% 30%, 60% 80%, 20% 90%;
+  }
+}
+
+/* ── Apply background layers to the main canvas ── */
+body {
+  background-color: var(--bg-base);
+  background-image: var(--bg-image);
+  background-size: var(--bg-size, cover);
+  background-attachment: fixed;
+  position: relative;
+}
+
+/* Noise overlay (only for themes that set --bg-noise) */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: var(--bg-noise);
+  background-size: 200px 200px;
+  opacity: 0.4;
+  mix-blend-mode: overlay;
+  z-index: 0;
+}
+
+/* Glow overlay (only for themes that set --bg-glow) */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: var(--bg-glow);
+  opacity: 0.6;
+  z-index: 0;
+}
+
+/* Ensure app content sits above overlays */
+#app, .app-layout, .main-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Theme card for settings preview ── */
+.theme-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-out);
+  user-select: none;
+  background: var(--bg-elevated);
+}
+
+.theme-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.theme-card.active {
+  border-color: var(--accent);
+  background: var(--accent-subtle);
+  box-shadow: var(--shadow-glow);
+}
+
+.theme-swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+}
+
+.theme-swatch-inner {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  border-radius: inherit;
+  overflow: hidden;
+  position: relative;
+}
+
+.theme-swatch-top,
+.theme-swatch-bottom {
+  width: 100%;
+  height: 100%;
+}
+
+.theme-name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+}
+
+.theme-desc {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .theme-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,35 @@
+# Node
+node_modules/
+npm-debug.log*
+npm-debug.log
+yarn-debug.log*
+yarn-error.log*
+*.local
+
+# 构建产物
+dist/
+dist-crypto-test/
+release/
+
+# Rust / Tauri
+src-tauri/target/
+src-tauri/gen/
+
+# 运行时日志（开发/测试产生）
+*.log
+logs/
+
+# 测试产物
+tests/artifacts/
+tests/*.png
+
+# 开发截图
+theme-screenshots/
+
+# 系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ������־
+src-tauri/*build*.txt
